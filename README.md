@@ -70,3 +70,40 @@ so I'm assuming no.
 Single-threaded use only.
 
 ### Algorithm Design
+
+The LRU cache has:
+
+1. Single-chaining hashtable
+2. Doubly-linked list
+3. An int, n, the max number of items in the cache
+4. An int representing the current number of items in the cache.
+
+Creating the LRU cache sets up the buckets of the hashtable,
+sets n.
+
+#### set(key, value)
+
+1. Create a new `CacheItem`
+   * get hash from `key.Hash()`
+   * set `CacheItem.data`
+2. Increment the current number of items in the cache
+   * if it's &gt; n, find least recently used container from doubly-linked list.
+   * Remove least recently used container from doubly-linked list and hashtable.
+   * decrement the current number of items in the cache, it will have value of n
+3. Add `CacheItem` container to hashtable
+4. Add `CacheItem` container to head (most recently used) end of doubly-linked list.
+
+#### get(key)
+
+1. Get hash from `key.Hash()`
+2. Find a container matching the hash in hashtable.
+   * If it exists, move the container to the head of the doubly-linked list.
+   * If it exists, return the `CacheItem.data`
+
+## Interview Analysis
+
+Unlike most Daily Programming Problems,
+this one really does deserve a "[hard]" rating.
+Several data structures, operations on each structure
+when doing LRU cache operations,
+probably a choice of data structure in a few places.
