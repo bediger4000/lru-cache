@@ -36,6 +36,6 @@ func (h *hashtable) Insert(item *CacheItem) bool {
 }
 
 // return true on delete, false when not finding key
-func (h *hashtable) delete(key LRUKey) bool {
+func (h *hashtable) delete(key LRUItem) bool {
 	return false
 }
