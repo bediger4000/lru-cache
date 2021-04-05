@@ -62,11 +62,11 @@ func (s *StringData) Hash() uint64 {
 }
 
 type Cache struct {
-	table   *hashtable
-	head    *CacheItem
-	tail    *CacheItem
-	n       int // max number of items in cache
-	current int // current number of items in cache
+	table       *hashtable
+	mostrecent  *CacheItem
+	leastrecent *CacheItem
+	n           int // max number of items in cache
+	current     int // current number of items in cache
 }
 
 func NewCache(n int) *Cache {
@@ -77,21 +77,57 @@ func NewCache(n int) *Cache {
 }
 
 func (c *Cache) Get(key LRUItem) interface{} {
-	// move to front of list
-	return nil
+	dataItem := c.table.Lookup(key)
+
+	if dataItem == nil {
+		return nil
+	}
+
+	if c.mostrecent == nil {
+		c.mostrecent = dataItem
+		c.leastrecent = dataItem
+		return dataItem
+	}
+
+	c.updateMostRecent(dataItem)
+
+	return dataItem.data
 }
 
-func (c *Cache) Set(key LRUItem, value interface{}) {
+func (c *Cache) updateMostRecent(node *CacheItem) {
+
+	if node == c.leastrecent {
+		c.leastrecent = c.leastrecent.prev
+	}
+
+	// chop it out of list
+	node.prev.next = node.next
+	node.next.prev = node.prev
+
+	// replace head
+	node.next = c.mostrecent
+	c.mostrecent.prev = node
+	node.prev = nil
+	c.mostrecent = node
+}
+
+func (c *Cache) Set(key LRUItem, value interface{}) bool {
 	var item *CacheItem
 	switch value.(type) {
 	case string:
 		item = NewCacheItem(key, NewStringData(value.(string)))
 	}
+	success := false
 	if c.table.Insert(item) {
 		c.current++
+		success = true
 		// move to front of list
 	}
 	if c.current > c.n {
 		// delete least recently used item
+		c.leastrecent = c.leastrecent.prev
+		c.leastrecent.next = nil
+		c.current--
 	}
+	return success
 }
