@@ -14,6 +14,20 @@ func NewTable(n int) *hashtable {
 	return h
 }
 
+// return LRUItem container on finding it, nil otherwise
+func (h *hashtable) Lookup(key LRUItem) *CacheItem {
+	bucketIndex := int(key.Hash()) % h.bucketcount
+	keyHash := key.Hash()
+	for node := h.buckets[bucketIndex]; node != nil; node = node.chain {
+		if node.hash == keyHash {
+			if node.data.Equals(key) {
+				return node
+			}
+		}
+	}
+	return nil
+}
+
 // return true on insert, false on finding a duplicate
 func (h *hashtable) Insert(item *CacheItem) bool {
 	bucketIndex := int(item.hash) % h.bucketcount
