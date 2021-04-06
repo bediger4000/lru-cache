@@ -29,14 +29,16 @@ func (h *hashtable) Lookup(key LRUItem) *CacheItem {
 }
 
 // return true on insert, false on finding a duplicate
-func (h *hashtable) Insert(item *CacheItem) bool {
+// On duplicate, also return the node it found, to be able
+// to move it to the head of the list
+func (h *hashtable) Insert(item *CacheItem) (*CacheItem, bool) {
 	bucketIndex := int(item.hash) % h.bucketcount
 
 	for node := h.buckets[bucketIndex]; node != nil; node = node.chain {
 		if node.hash == item.hash {
 			if node.data.Equals(item.data) {
 				// found a duplicate
-				return false
+				return node, false
 			}
 		}
 	}
@@ -46,7 +48,7 @@ func (h *hashtable) Insert(item *CacheItem) bool {
 	} else {
 		h.buckets[bucketIndex] = item
 	}
-	return true
+	return h.buckets[bucketIndex], true
 }
 
 // return true on delete, false when not finding key
