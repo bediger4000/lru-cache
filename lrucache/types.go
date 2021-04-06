@@ -18,12 +18,11 @@ type LRUItem interface {
 
 func NewCacheStringItem(str string) *CacheItem {
 	datum := &StringData{data: str}
-	datum.Hash()
-	return &CacheItem{key: datum, data: datum}
+	return &CacheItem{key: datum, data: datum, hash: datum.Hash()}
 }
 
 func NewCacheItem(key LRUItem, data LRUItem) *CacheItem {
-	return &CacheItem{key: key, data: data}
+	return &CacheItem{key: key, data: data, hash: key.Hash()}
 }
 
 type StringData struct {
