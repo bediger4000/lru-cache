@@ -16,8 +16,8 @@ func NewTable(n int) *hashtable {
 
 // return LRUItem container on finding it, nil otherwise
 func (h *hashtable) Lookup(key LRUItem) *CacheItem {
-	bucketIndex := int(key.Hash()) % h.bucketcount
 	keyHash := key.Hash()
+	bucketIndex := int(keyHash) % h.bucketcount
 	for node := h.buckets[bucketIndex]; node != nil; node = node.chain {
 		if node.hash == keyHash {
 			if node.data.Equals(key) {
