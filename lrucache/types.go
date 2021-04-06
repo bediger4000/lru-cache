@@ -1,5 +1,7 @@
 package lru
 
+import "fmt"
+
 type CacheItem struct {
 	key   LRUItem
 	data  LRUItem
@@ -96,13 +98,25 @@ func (c *Cache) Get(key LRUItem) interface{} {
 
 func (c *Cache) updateMostRecent(node *CacheItem) {
 
+	fmt.Printf("Move data %q to most recently used\n",
+		node.data.(*StringData).data,
+	)
+
 	if node == c.leastrecent {
 		c.leastrecent = c.leastrecent.prev
 	}
 
+	if node == c.mostrecent {
+		return
+	}
+
 	// chop it out of list
-	node.prev.next = node.next
-	node.next.prev = node.prev
+	if node.prev != nil {
+		node.prev.next = node.next
+	}
+	if node.next != nil {
+		node.next.prev = node.prev
+	}
 
 	// replace head
 	node.next = c.mostrecent
@@ -117,11 +131,22 @@ func (c *Cache) Set(key LRUItem, value interface{}) bool {
 	case string:
 		item = NewCacheItem(key, NewStringData(value.(string)))
 	}
-	success := false
-	if c.table.Insert(item) {
+	newinsert := false
+	if node, inserted := c.table.Insert(item); inserted {
 		c.current++
-		success = true
-		// move to front of list
+		newinsert = true
+		// put on head of list
+		item.next = c.mostrecent
+		if c.mostrecent != nil {
+			c.mostrecent.prev = item
+			c.mostrecent = item
+		} else {
+			c.mostrecent = item
+			c.leastrecent = item
+		}
+	} else {
+		// a duplicate, node points to it
+		c.updateMostRecent(node)
 	}
 	if c.current > c.n {
 		// delete least recently used item
@@ -129,5 +154,19 @@ func (c *Cache) Set(key LRUItem, value interface{}) bool {
 		c.leastrecent.next = nil
 		c.current--
 	}
-	return success
+	return newinsert
+}
+
+func (c *Cache) PrintUse() {
+
+	for node := c.mostrecent; node != nil; node = node.next {
+		fmt.Printf("Data %q at %p: next %p, prev %p\n",
+			node.data.(*StringData).data, node, node.next, node.prev,
+		)
+	}
+	fmt.Printf("Least recent %q, next %p, prev %p\n",
+		c.leastrecent.data.(*StringData).data,
+		c.leastrecent.next,
+		c.leastrecent.prev,
+	)
 }
