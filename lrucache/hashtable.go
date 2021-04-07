@@ -3,6 +3,7 @@ package lru
 type hashtable struct {
 	bucketcount int
 	buckets     []*CacheItem
+	size        int
 }
 
 func NewTable(n int) *hashtable {
@@ -48,10 +49,30 @@ func (h *hashtable) Insert(item *CacheItem) (*CacheItem, bool) {
 	} else {
 		h.buckets[bucketIndex] = item
 	}
+	h.size++
 	return h.buckets[bucketIndex], true
 }
 
 // return true on delete, false when not finding key
-func (h *hashtable) delete(key LRUItem) bool {
-	return false
+func (h *hashtable) Delete(key LRUItem) bool {
+	bucketIndex := int(key.Hash()) % h.bucketcount
+	indirect := &h.buckets[bucketIndex]
+
+	for !(*indirect).data.Equals(key) {
+		indirect = &(*indirect).chain
+		if *indirect == nil {
+			return false
+		}
+	}
+
+	if *indirect != nil {
+		*indirect = (*indirect).chain
+		h.size--
+	}
+
+	return true
+}
+
+func (h *hashtable) Size() int {
+	return h.size
 }
