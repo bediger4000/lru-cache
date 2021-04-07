@@ -149,8 +149,12 @@ func (c *Cache) Set(key LRUItem, value interface{}) bool {
 	}
 	if c.current > c.n {
 		// delete least recently used item
+		tmp := c.leastrecent
 		c.leastrecent = c.leastrecent.prev
 		c.leastrecent.next = nil
+
+		dkey := NewStringData(tmp.data.(*StringData).data)
+		c.table.Delete(dkey)
 		c.current--
 	}
 	return newinsert
@@ -158,6 +162,7 @@ func (c *Cache) Set(key LRUItem, value interface{}) bool {
 
 func (c *Cache) PrintUse() {
 
+	fmt.Printf("%d items in hashtable\n", c.table.Size())
 	for node := c.mostrecent; node != nil; node = node.next {
 		fmt.Printf("Data %q at %p: next %p, prev %p\n",
 			node.data.(*StringData).data, node, node.next, node.prev,
