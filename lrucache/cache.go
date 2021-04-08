@@ -3,8 +3,11 @@ package lru
 import "fmt"
 
 func NewCache(n int) *Cache {
+	// initializing the hash table might be important:
+	// don't want to waste a lot of space on buckets,
+	// bucket count a prime said to be important
 	return &Cache{
-		table: NewTable(n),
+		table: NewTable(n / 2),
 		n:     n,
 	}
 }
