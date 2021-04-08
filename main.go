@@ -25,7 +25,7 @@ func main() {
 	for _, str := range os.Args[1:] {
 		datum := lru.NewStringData(str)
 		if d := cache.Get(datum); d != nil {
-			fmt.Printf("Found %v in cache\n", d)
+			fmt.Printf("Found %+v in cache\n", d)
 		} else {
 			fmt.Printf("did not find %q in cache\n", str)
 		}
