@@ -29,10 +29,6 @@ func (c *Cache) Get(key LRUItem) interface{} {
 
 func (c *Cache) updateMostRecent(node *CacheItem) {
 
-	fmt.Printf("Move data %q to most recently used\n",
-		node.data.(*StringData).data,
-	)
-
 	if node == c.leastrecent {
 		c.leastrecent = c.leastrecent.prev
 	}
