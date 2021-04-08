@@ -107,3 +107,9 @@ this one really does deserve a "[hard]" rating.
 Several data structures, operations on each structure
 when doing LRU cache operations,
 probably a choice of data structure in a few places.
+
+## Around the web
+
+https://anothercasualcoder.blogspot.com/2018/11/least-recently-used-lru-cache-by-google.html
+https://www.geeksforgeeks.org/lru-cache-implementation/
+https://codereview.stackexchange.com/questions/225788/least-recently-used-cache-daily-coding-practice
