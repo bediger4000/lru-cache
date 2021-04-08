@@ -65,10 +65,8 @@ func (h *hashtable) Delete(key LRUItem) bool {
 		}
 	}
 
-	if *indirect != nil {
-		*indirect = (*indirect).chain
-		h.size--
-	}
+	*indirect = (*indirect).chain
+	h.size--
 
 	return true
 }
