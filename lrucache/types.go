@@ -6,8 +6,8 @@ type CacheItem struct {
 	key   LRUItem
 	data  LRUItem
 	hash  uint64
-	chain *CacheItem
-	next  *CacheItem
+	chain *CacheItem // hashtable chain
+	next  *CacheItem // most-recently-used list
 	prev  *CacheItem
 }
 
