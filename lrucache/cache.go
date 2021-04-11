@@ -3,11 +3,12 @@ package lru
 import "fmt"
 
 func NewCache(n int) *Cache {
-	// initializing the hash table might be important:
-	// don't want to waste a lot of space on buckets,
-	// bucket count a prime said to be important
+	// set number of buckets so that the length of hash chains
+	// is about 10. That's said to be an optimal hash chain length
+	// and since the hashtable will hold a known number of items (n),
+	// we can keep the average chain length an "optimal" size.
 	return &Cache{
-		table: NewTable(n / 2),
+		table: NewTable(n / 10),
 		n:     n,
 	}
 }

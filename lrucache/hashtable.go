@@ -6,16 +6,18 @@ type hashtable struct {
 	size        int
 }
 
-func NewTable(n int) *hashtable {
-	count := n
+// NewTable creates a single-chained hashtable with
+// a certain number of buckets, or chains of items
+// in the hashtable.
+func NewTable(desiredBucketCount int) *hashtable {
 	h := &hashtable{
-		bucketcount: count,
-		buckets:     make([]*CacheItem, count),
+		bucketcount: desiredBucketCount,
+		buckets:     make([]*CacheItem, desiredBucketCount),
 	}
 	return h
 }
 
-// return LRUItem container on finding it, nil otherwise
+// Lookup returns an LRUItem container on finding it, nil otherwise
 func (h *hashtable) Lookup(key LRUItem) *CacheItem {
 	keyHash := key.Hash()
 	bucketIndex := int(keyHash) % h.bucketcount
