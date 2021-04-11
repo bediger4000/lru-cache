@@ -29,11 +29,11 @@ func (s *StringData) Data() string {
 // Hash method of StringData: DJB2 hash function
 // extremely unlikely that the DJB2 hash of a string has value 0,
 // but if it does, this recalculates zero every invocation.
-func (s *StringData) Hash() uint64 {
+func (s *StringData) Hash() uint32 {
 	if s.hash == 0 {
-		var hash uint64 = 5381
+		var hash uint32 = 5381
 		for _, b := range []byte(s.data) {
-			hash = ((hash << 5) + hash) + uint64(b)
+			hash = ((hash << 5) + hash) + uint32(b)
 		}
 		s.hash = hash
 	}
