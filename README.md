@@ -78,8 +78,67 @@ The LRU cache has:
 3. An int, n, the max number of items in the cache
 4. An int representing the current number of items in the cache.
 
+I ended up with 460 lines of Go,
+implementing a single-chained hashtable (not a Go map)
+and a doubly-linked list,
+as well as the cache's `get` and `set` methods.
+The cache uses an interface, so multiple types of keys and data
+could exist, but I only implemented a string key and data type.
+I wrote by data types rather than using standard library or package
+data types so that I could ensure O(1) operation.
+
 Creating the LRU cache sets up the buckets of the hashtable,
 sets n.
+The number of buckets in the hashtable should be about 1/10 of n.
+That would mean that a full cache (n items in it),
+if the hashing function is good,
+the chains of items would average a length of 10.
+That's said to be an optimal length.
+
+The doubly-linked list lets the cache keep track of the "least recently used" property.
+When a "get" operation finds an item in the hashtable,
+the code moves that item from somewhere in the doubly-linked list
+to the front of that list: it's the most recently used.
+
+I chose to do "invasive" data structures:
+the `CacheItem` struct has elements that allow code to
+put a `CacheItem` instance into a single-chained hash table
+and a doubly-linked list at the same time.
+This is contrary to Object Oriented dogma,
+where the data would be referred to by a hash table data structure,
+and a doubly-linked list node structure.
+The programmer would use standard libraries of "Queues"
+and "Dictionaries" to hold the data.
+
+I chose to hold the data in structures that match a Go interface
+I named `LRUItem`. The phrasing of the problem statement
+didm't give any clues about the types of data or keys:
+either data or key could be a string, or an integer,
+or a floating point number.
+I only implemented a string data type,
+using it for both cache key and data.
+Because the key and data can be any type,
+having the `CacheItem` type be a node in a singly-linked
+hashtable chain, and a doubly-linked "most recently used" list
+makes the most sense.
+The cache doesn't have to have `n` hashtable list nodes,
+and another `n` LRU doubly-linked list nodes.
+The programmer doesn't have to keep track of 2 container structs
+per data item in the cache,
+and the algorithm doesn't have to deal with potential lack of locality
+for 2 container data structs that refer to the same cached data.
+There's probably also some memory savings:
+there's no Go type-header for a single single-chain-pointer,
+and another Go type-header for a doubly-linke list pointer.
+
+The speed of lookups in the single-chained hash table
+is dependent to a large extent on the hashing function
+used to distribute data items over the hash table buckets.
+I used the well-known [DJB2](http://www.cse.yorku.ca/~oz/hash.html)
+hashing function hoping that items get distributed over the
+number of buckets (item chains), and that there are very
+few duplicates.
+DJB2 hashing appears to work well.
 
 #### set(key, value)
 
@@ -108,8 +167,33 @@ Several data structures, operations on each structure
 when doing LRU cache operations,
 probably a choice of data structure in a few places.
 
+A single-chaining hash table is easy to code,
+but may not constitute the best hash table for a particular data item
+or key type.
+
+Defining the "least-recently-used" property by order in a fixed-size
+doubly-length list might not be as fast as one would wish,
+or as easy to code.
+Using a doubly-linked list as a circular buffer might work.
+The "tail" of the list is just `head.next`, so once the cache
+is full, a new datum replaces the datum at `head.next`,
+and becomes the new head. 
+It's possible that a fixed-size array or slice,
+treated as a circular buffer would work well.
+My rationalizations about a since `CacheItem` container could
+tip in favor of a Go slice of pointers, even for very large
+numbers of cache items.
+Coding might be easier, and memory usage might go down.
+
 ## Around the web
 
-https://anothercasualcoder.blogspot.com/2018/11/least-recently-used-lru-cache-by-google.html
-https://www.geeksforgeeks.org/lru-cache-implementation/
-https://codereview.stackexchange.com/questions/225788/least-recently-used-cache-daily-coding-practice
+* [Standard library-based](https://anothercasualcoder.blogspot.com/2018/11/least-recently-used-lru-cache-by-google.html)
+implementation. Not at all sure what language this is in.
+* [C++ STL](https://www.geeksforgeeks.org/lru-cache-implementation/)
+implementation.
+* [Python](https://codereview.stackexchange.com/questions/225788/least-recently-used-cache-daily-coding-practice)
+
+All 3 of these other implementations use the same hashtable and queue cache implementation.
+They all use some standard library data types to do the hashtable and doubly-linked list.
+They all have less than 20% of the lines of code I ended up with.
+I just might have failed this interview question.
