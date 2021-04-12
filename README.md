@@ -197,3 +197,24 @@ All 3 of these other implementations use the same hashtable and queue cache impl
 They all use some standard library data types to do the hashtable and doubly-linked list.
 They all have less than 20% of the lines of code I ended up with.
 I just might have failed this interview question.
+
+To see if Go can do an equally succint version of an LRU cache
+if the programmer exploits standard library code,
+I wrote a 78-line [version](alternative/lru.go) that exploits
+Go's "map" data type, and a standard package doubly-linked list
+container.
+Even here, I used the doubly-linked list container `*list.Element`
+as the data type stored in the map,
+mainly due to the `list.Remove` and `list.MoveToFront` methods
+of the doubly-linked list package.
+
+This version does have drawbacks:
+
+* Not clear how efficient the map data type is.
+* Not clear that the `list.Remove` item is O(1).
+It might actually walk the list to remove the item,
+although that probably isn't true.
+
+These objections might hold for any of the LRU caches that
+exploit standard library or package or template code,
+and boil down to objecting to a black box implementation.
