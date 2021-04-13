@@ -152,6 +152,14 @@ DJB2 hashing appears to work well.
 3. Add `CacheItem` container to hashtable
 4. Add `CacheItem` container to head (most recently used) end of doubly-linked list.
 
+It should be possible to instantiate only n `CacheItem` containers.
+If the cache is full, remove the least-recently-used item
+from the doubly-linked list, and delete it from the hash table.
+Reset key and hash value and data,
+put on the head of the doubly-linked list,
+and re-insert into the hashtable under the new key.
+I did not do this optimization.
+
 #### get(key)
 
 1. Get hash from `key.Hash()`
@@ -180,7 +188,7 @@ is full, a new datum replaces the datum at `head.next`,
 and becomes the new head. 
 It's possible that a fixed-size array or slice,
 treated as a circular buffer would work well.
-My rationalizations about a since `CacheItem` container could
+My rationalizations about a single `CacheItem` container could
 tip in favor of a Go slice of pointers, even for very large
 numbers of cache items.
 Coding might be easier, and memory usage might go down.
