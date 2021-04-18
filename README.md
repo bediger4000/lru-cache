@@ -38,17 +38,17 @@ that look like this:
 
 ```go
 type CacheItem struct {
-	key    LRUKey
-	data   interface{}
+	key    LRUItem
+	data   LRUItem
     hash   uint64
     chain *CacheItem
     next  *CacheItem
     prev  *CacheItem
 }
 
-type LRUKey interface {
-	Hash() uint64
-	Equals(otherKey LRUKey) bool
+type LRUItem interface {
+	Hash() uint32
+	Equals(otherKey LRUItem) bool
 }
 ```
 
@@ -63,6 +63,12 @@ and a doubly-linked list, for the recent use status.
 Defining an interface (I'm doing this in Go) for the keys
 lets me ignore the key type until I need a key of some
 particular type, `int` or `string` or whatever.
+The algorithm for searching a hash chain can compare hash values
+until it finds a numerically-equal hash value,
+then call the `LRUItem.Equals` method to do an actual comparison.
+
+I used the same named type `LRUItem` for both key and data.
+I'm not sure this is a good idea, but for the time being, it works.
 
 Is the LRU cache used by multiple threads?
 Nothing in the problem statement about that,
@@ -138,7 +144,10 @@ I used the well-known [DJB2](http://www.cse.yorku.ca/~oz/hash.html)
 hashing function hoping that items get distributed over the
 number of buckets (item chains), and that there are very
 few duplicates.
-DJB2 hashing appears to work well.
+DJB2 hashing appears to work well,
+but I did need to use Go's `uint32` type for hash values.
+Apparently DJB2's good distribution depends on periodically overflowing
+a 32-bit value.
 
 #### set(key, value)
 
