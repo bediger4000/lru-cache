@@ -202,7 +202,12 @@ tip in favor of a Go slice of pointers, even for very large
 numbers of cache items.
 Coding might be easier, and memory usage might go down.
 
-## Around the web
+## Other Implementations
+
+This problem appears in the "Hash Tables" chapter
+of the [Daily Coding Problem book](https://www.amazon.com/Daily-Coding-Problem-exceptionally-interviews/dp/1793296634/ref=sr_1_3?dchild=1&keywords=daily+coding+problem&qid=1627421725&sr=8-3)
+They show an approximately 65-line Python solution,
+but only the class definitions, no invocation scaffolding.
 
 * [Standard library-based](https://anothercasualcoder.blogspot.com/2018/11/least-recently-used-lru-cache-by-google.html)
 implementation. Not at all sure what language this is in.
@@ -210,10 +215,13 @@ implementation. Not at all sure what language this is in.
 implementation.
 * [Python](https://codereview.stackexchange.com/questions/225788/least-recently-used-cache-daily-coding-practice)
 
-All 3 of these other implementations use the same hashtable and queue cache implementation.
-They all use some standard library data types to do the hashtable and doubly-linked list.
-They all have less than 20% of the lines of code I ended up with.
-I just might have failed this interview question.
+All 3 of these other implementations use the same hashtable and queue
+cache implementation.
+They all use some standard library data types to
+do the hashtable and doubly-linked list.
+They all have less than 20% of
+the lines of code I ended up with.  I just might have failed this
+interview question.
 
 To see if Go can do an equally succint version of an LRU cache
 if the programmer exploits standard library code,
