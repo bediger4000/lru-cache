@@ -19,7 +19,7 @@ Each operation should run in O(1) time.
 This is a design problem,
 including both data structure and algorithm elements.
 
-Famously, hashtables are O(1), at least amortized over many lookups.
+Famously, hash tables are O(1), at least amortized over many look-ups.
 The problem statement seems like a big hint.
 
 The semantics of the `set()` method imply that a
@@ -33,7 +33,7 @@ Does that put the item at the head or tail of the LRU status buffer?
 
 ### Data Design
 
-A single-chain hashtable would be filled with data containers
+A single-chain hash table would be filled with data containers
 that look like this:
 
 ```go
@@ -52,7 +52,7 @@ type LRUItem interface {
 }
 ```
 
-`CacheItem.chain` element points to the next item in the hashbucket,
+`CacheItem.chain` element points to the next item in the hash bucket,
 while `CacheItem.prev` and `CacheItem.next` point to doubly-linked list items
 used to determine use status.
 The containers have elements that allow them to exist in 2
@@ -79,13 +79,13 @@ Single-threaded use only.
 
 The LRU cache has:
 
-1. Single-chaining hashtable
+1. Single-chaining hash table
 2. Doubly-linked list
 3. An int, n, the max number of items in the cache
 4. An int representing the current number of items in the cache.
 
 I ended up with 460 lines of Go,
-implementing a single-chained hashtable (not a Go map)
+implementing a single-chained hash table (not a Go map)
 and a doubly-linked list,
 as well as the cache's `get` and `set` methods.
 The cache uses an interface, so multiple types of keys and data
@@ -93,16 +93,16 @@ could exist, but I only implemented a string key and data type.
 I wrote by data types rather than using standard library or package
 data types so that I could ensure O(1) operation.
 
-Creating the LRU cache sets up the buckets of the hashtable,
+Creating the LRU cache sets up the buckets of the hash table,
 sets n.
-The number of buckets in the hashtable should be about 1/10 of n.
+The number of buckets in the hash table should be about 1/10 of n.
 That would mean that a full cache (n items in it),
 if the hashing function is good,
 the chains of items would average a length of 10.
 That's said to be an optimal length.
 
 The doubly-linked list lets the cache keep track of the "least recently used" property.
-When a "get" operation finds an item in the hashtable,
+When a "get" operation finds an item in the hash table,
 the code moves that item from somewhere in the doubly-linked list
 to the front of that list: it's the most recently used.
 
@@ -118,16 +118,16 @@ and "Dictionaries" to hold the data.
 
 I chose to hold the data in structures that match a Go interface
 I named `LRUItem`. The phrasing of the problem statement
-didm't give any clues about the types of data or keys:
+didn't give any clues about the types of data or keys:
 either data or key could be a string, or an integer,
 or a floating point number.
 I only implemented a string data type,
 using it for both cache key and data.
 Because the key and data can be any type,
 having the `CacheItem` type be a node in a singly-linked
-hashtable chain, and a doubly-linked "most recently used" list
+hash table chain, and a doubly-linked "most recently used" list
 makes the most sense.
-The cache doesn't have to have `n` hashtable list nodes,
+The cache doesn't have to have `n` hash table list nodes,
 and another `n` LRU doubly-linked list nodes.
 The programmer doesn't have to keep track of 2 container structs
 per data item in the cache,
@@ -135,9 +135,9 @@ and the algorithm doesn't have to deal with potential lack of locality
 for 2 container data structs that refer to the same cached data.
 There's probably also some memory savings:
 there's no Go type-header for a single single-chain-pointer,
-and another Go type-header for a doubly-linke list pointer.
+and another Go type-header for a doubly-linked list pointer.
 
-The speed of lookups in the single-chained hash table
+The speed of lookouts in the single-chained hash table
 is dependent to a large extent on the hashing function
 used to distribute data items over the hash table buckets.
 I used the well-known [DJB2](http://www.cse.yorku.ca/~oz/hash.html)
@@ -156,9 +156,9 @@ a 32-bit value.
    * set `CacheItem.data`
 2. Increment the current number of items in the cache
    * if it's &gt; n, find least recently used container from doubly-linked list.
-   * Remove least recently used container from doubly-linked list and hashtable.
+   * Remove least recently used container from doubly-linked list and hash table.
    * decrement the current number of items in the cache, it will have value of n
-3. Add `CacheItem` container to hashtable
+3. Add `CacheItem` container to hash table
 4. Add `CacheItem` container to head (most recently used) end of doubly-linked list.
 
 It should be possible to instantiate only n `CacheItem` containers.
@@ -166,13 +166,13 @@ If the cache is full, remove the least-recently-used item
 from the doubly-linked list, and delete it from the hash table.
 Reset key and hash value and data,
 put on the head of the doubly-linked list,
-and re-insert into the hashtable under the new key.
+and re-insert into the hash table under the new key.
 I did not do this optimization.
 
 #### get(key)
 
 1. Get hash from `key.Hash()`
-2. Find a container matching the hash in hashtable.
+2. Find a container matching the hash in hash table.
    * If it exists, move the container to the head of the doubly-linked list.
    * If it exists, return the `CacheItem.data`
 
@@ -215,15 +215,15 @@ implementation. Not at all sure what language this is in.
 implementation.
 * [Python](https://codereview.stackexchange.com/questions/225788/least-recently-used-cache-daily-coding-practice)
 
-All 3 of these other implementations use the same hashtable and queue
+All 3 of these other implementations use the same hash table and queue
 cache implementation.
 They all use some standard library data types to
-do the hashtable and doubly-linked list.
+do the hash table and doubly-linked list.
 They all have less than 20% of
 the lines of code I ended up with.  I just might have failed this
 interview question.
 
-To see if Go can do an equally succint version of an LRU cache
+To see if Go can do an equally succinct version of an LRU cache
 if the programmer exploits standard library code,
 I wrote a 78-line [version](alternative/lru.go) that exploits
 Go's "map" data type, and a standard package doubly-linked list
